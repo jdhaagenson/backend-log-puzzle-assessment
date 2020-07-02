@@ -17,8 +17,11 @@ rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
 import os
 import re
 import sys
-import urllib.request
+import urllib.request as request
 import argparse
+import pprint
+
+pprint = pprint.pprint
 
 
 def read_urls(filename):
@@ -26,8 +29,15 @@ def read_urls(filename):
     extracting the hostname from the filename itself, sorting
     alphabetically in increasing order, and screening out duplicates.
     """
-    # +++your code here+++
-    pass
+    pattern = r"GET (\S*puzzle\S*)"
+    with open(filename) as f:
+        string = f.read()
+        matches = re.findall(pattern, string)
+        noduplicates = []
+        for match in matches:
+            if match not in noduplicates:
+                noduplicates.append(match)
+    return sorted(noduplicates)
 
 
 def download_images(img_urls, dest_dir):
