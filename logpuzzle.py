@@ -19,10 +19,6 @@ import re
 import sys
 import urllib.request
 import argparse
-import pprint
-import shutil
-
-pprint = pprint.pprint
 
 
 def read_urls(filename):
@@ -34,6 +30,7 @@ def read_urls(filename):
     with open(filename) as f:
         string = f.read()
         matches = re.findall(pattern, string)
+        matches = ['http://code.google.com' + match for match in matches]
         noduplicates = []
         for match in matches:
             if match not in noduplicates:
@@ -51,14 +48,13 @@ def download_images(img_urls, dest_dir):
     """
     if not os.path.isdir(dest_dir):
         os.mkdir(dest_dir)
-    with open(f'{dest_dir}/index.html') as html:
+    with open(f'{dest_dir}/index.html', 'w') as html:
         html.write('<head></head>\n<body>\n')
         for url in enumerate(img_urls):
-            response = urllib.request.urlopen(url[1])
-            data = response.read()
-            with open(f'{dest_dir}/img{str(url[0])}', 'wb') as output:
-                shutil.copyfileobj(data, output)
-            html.write(f'<img src="img{str(url[0])}"></img>')
+            with open(f'{dest_dir}/img{str(url[0])}.jpg', 'wb'):
+                filename = f'{dest_dir}/img{str(url[0])}.jpg'
+                urllib.request.urlretrieve(url[1], filename)
+            html.write(f'<img src="img{str(url[0])}.jpg"></img>')
         html.write('\n</body')
 
 
