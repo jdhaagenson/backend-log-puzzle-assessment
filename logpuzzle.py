@@ -27,6 +27,7 @@ def read_urls(filename):
     alphabetically in increasing order, and screening out duplicates.
     """
     pattern = r"GET (\S*puzzle\S*)"
+    place_pattern = r"-(\w{4}).jpg"
     with open(filename) as f:
         string = f.read()
         matches = re.findall(pattern, string)
@@ -35,7 +36,14 @@ def read_urls(filename):
         for match in matches:
             if match not in noduplicates:
                 noduplicates.append(match)
-    return sorted(noduplicates)
+                sorted_no_duplicates = sorted(noduplicates)
+        if re.findall(place_pattern, string) is not None:
+            # p_matches = re.findall(place_pattern, string)
+            return sorted(noduplicates, key=lambda x: x[-8:-4])
+        return sorted_no_duplicates
+
+
+read_urls('place_code.google.com')
 
 
 def download_images(img_urls, dest_dir):
@@ -81,6 +89,8 @@ def main(args):
     img_urls = read_urls(parsed_args.logfile)
 
     if parsed_args.todir:
+        print(
+            f"Downloading from {parsed_args.logfile} to {parsed_args.todir}..")
         download_images(img_urls, parsed_args.todir)
     else:
         print('\n'.join(img_urls))
