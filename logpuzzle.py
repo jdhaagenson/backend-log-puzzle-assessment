@@ -17,9 +17,10 @@ rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
 import os
 import re
 import sys
-import urllib.request as request
+import urllib.request
 import argparse
 import pprint
+import shutil
 
 pprint = pprint.pprint
 
@@ -48,8 +49,17 @@ def download_images(img_urls, dest_dir):
     to show each local image file.
     Creates the directory if necessary.
     """
-    # +++your code here+++
-    pass
+    if not os.path.isdir(dest_dir):
+        os.mkdir(dest_dir)
+    with open(f'{dest_dir}/index.html') as html:
+        html.write('<head></head>\n<body>\n')
+        for url in enumerate(img_urls):
+            response = urllib.request.urlopen(url[1])
+            data = response.read()
+            with open(f'{dest_dir}/img{str(url[0])}', 'wb') as output:
+                shutil.copyfileobj(data, output)
+            html.write(f'<img src="img{str(url[0])}"></img>')
+        html.write('\n</body')
 
 
 def create_parser():
