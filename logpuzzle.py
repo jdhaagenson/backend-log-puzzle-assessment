@@ -21,29 +21,34 @@ import urllib.request
 import argparse
 
 
+def remove_duplicates(url_list):
+    result = []
+    for url in url_list:
+        if url not in result:
+            result.append(url)
+    return result
+
+
 def read_urls(filename):
     """Returns a list of the puzzle URLs from the given log file,
     extracting the hostname from the filename itself, sorting
     alphabetically in increasing order, and screening out duplicates.
     """
     pattern = r"GET (\S*puzzle\S*)"
-    place_pattern = r"-(\w{4}).jpg"
+    place_pattern = r"(puzzle/\w-\w{4}-(\w{4})).jpg"
     with open(filename) as f:
         string = f.read()
-        matches = re.findall(pattern, string)
+        if re.search(place_pattern, string) is not None:
+            matches = re.findall(place_pattern, string)
+            matches = sorted(matches, key=lambda x: x[-8:-4])
+        else:
+            matches = re.findall(pattern, string)
         matches = ['http://code.google.com' + match for match in matches]
-        noduplicates = []
-        for match in matches:
-            if match not in noduplicates:
-                noduplicates.append(match)
-                sorted_no_duplicates = sorted(noduplicates)
-        if re.findall(place_pattern, string) is not None:
-            # p_matches = re.findall(place_pattern, string)
-            return sorted(noduplicates, key=lambda x: x[-8:-4])
-        return sorted_no_duplicates
+        noduplicates = remove_duplicates(matches)
+        return sorted(noduplicates)
 
 
-read_urls('place_code.google.com')
+read_urls('animal_code.google.com')
 
 
 def download_images(img_urls, dest_dir):
