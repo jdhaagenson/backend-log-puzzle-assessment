@@ -21,13 +21,35 @@ import urllib.request
 import argparse
 
 
+def remove_duplicates(url_list):
+    result = []
+    for url in url_list:
+        if url not in result:
+            result.append(url)
+    return result
+
+
 def read_urls(filename):
     """Returns a list of the puzzle URLs from the given log file,
     extracting the hostname from the filename itself, sorting
     alphabetically in increasing order, and screening out duplicates.
     """
-    # +++your code here+++
-    pass
+    pattern = r"GET (\S*puzzle\S*)"
+    place_pattern = r"GET (\S*puzzle/\w-\w{4}-\w{4}\S*)"
+    with open(filename) as f:
+        string = f.read()
+        if re.search(place_pattern, string) is not None:
+            matches = re.findall(place_pattern, string)
+            matches = sorted(matches, key=lambda x: x[-8:-4])
+        else:
+            matches = re.findall(pattern, string)
+            matches = sorted(matches)
+        matches = ['http://code.google.com' + match for match in matches]
+        noduplicates = remove_duplicates(matches)
+        return noduplicates
+
+
+# read_urls('place_code.google.com')
 
 
 def download_images(img_urls, dest_dir):
@@ -38,8 +60,16 @@ def download_images(img_urls, dest_dir):
     to show each local image file.
     Creates the directory if necessary.
     """
-    # +++your code here+++
-    pass
+    if not os.path.isdir(dest_dir):
+        os.mkdir(dest_dir)
+    with open(f'{dest_dir}/index.html', 'w') as html:
+        html.write('<head></head>\n<body>\n')
+        for url in enumerate(img_urls):
+            with open(f'{dest_dir}/img{str(url[0])}.jpg', 'wb'):
+                filename = f'{dest_dir}/img{str(url[0])}.jpg'
+                urllib.request.urlretrieve(url[1], filename)
+            html.write(f'<img src="img{str(url[0])}.jpg"></img>')
+        html.write('\n</body')
 
 
 def create_parser():
@@ -65,6 +95,8 @@ def main(args):
     img_urls = read_urls(parsed_args.logfile)
 
     if parsed_args.todir:
+        print(
+            f"Downloading from {parsed_args.logfile} to {parsed_args.todir}..")
         download_images(img_urls, parsed_args.todir)
     else:
         print('\n'.join(img_urls))
