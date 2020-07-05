@@ -49,7 +49,7 @@ def read_urls(filename):
         return noduplicates
 
 
-read_urls('place_code.google.com')
+# read_urls('place_code.google.com')
 
 
 def download_images(img_urls, dest_dir):
